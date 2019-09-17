@@ -3,9 +3,10 @@ package com.company;
 import java.util.Scanner;
 
 public class Main {
-    private static int[] towerone = {0,1,2,3};
-    private static int[] towertwo = {0,0,0,0};
-    private static int[] towerthree = {0,0,0,0};
+   private static int[] towerone;
+    private static int[] towertwo;
+    private static int[] towerthree;
+    private static int[] towererror;
 
     private static boolean state = true;
 
@@ -13,21 +14,16 @@ public class Main {
             " die Scheiben\nvon dem ersten Stab zum dritten zu befördern, wobei der zweite Stab zur Hilfe genutzt wird." +
             "\nDie größeren Scheiben dürfen hierbei jedoch nicht über den kleinen Scheiben liegen und die " +
             "\nScheiben dürfen nur einzeln bewegt werden." +
-            "\nIn dem Programm bewegt man die Steine ...\n";
+            "\nIn dem Programm bewegt man die Scheiben dadurch, dass man zwei Stäbe anwählt. Die Stäbe  " +
+            "\nsind mit den Zahlen 1, 2 und 3 gekennzeichnet und die Scheiben sind der Größe nach " +
+            "\nbenannt, wobei die Scheibe 1 die größte ist und die folgenden werden immer kleiner. Der erste " +
+            "\ngenannte Stab ist der Stab von dem die oberste Scheibe genommen wird und der zweite ist der " +
+            "\nangezielte Stab. z.B.: Nutzereingabe = '12' --> 1 = Anfangsstab , 2 = Zielstab. \n";
 
     public static void main(String[] args) {
         while (state){
             switch (funcSelect()){
                 case 1:
-                    towerone[1] = 1;
-                    towerone[2] = 2;
-                    towerone[3] = 3;
-                    towertwo[1] = 0;
-                    towertwo[2] = 0;
-                    towertwo[3] = 0;
-                    towerthree[1] = 0;
-                    towerthree[2] = 0;
-                    towerthree[3] = 0;
                     gameFunc();
                     break;
 
@@ -64,11 +60,11 @@ public class Main {
 
     private static void gameFunc() {
         boolean game = true;
-        String eingabe;
-        String eingabestart;
-        String eingabeziel;
-        int start;
-        int ziel;
+        towerone = new int[]{0, 1, 2, 3};
+        towertwo = new int[]{0, 0, 0, 0};
+        towerthree = new int[]{0, 0, 0, 0};
+        towererror = new int[]{9, 9, 9, 9};
+        int turns = 0;
 
         while (game) {
             if ((towerthree[1] == 1) && (towerthree[2] == 2) && (towerthree[3] == 3)) {
@@ -76,41 +72,27 @@ public class Main {
             } else {
                 System.out.println(output());
                 System.out.println("Geben Sie den Zug ein:\n");
-                Scanner turmeingabe = new Scanner(System.in);
-                eingabe = turmeingabe.nextLine();
-                eingabestart = eingabe.substring(0,1);
-                eingabeziel = eingabe.substring(1,2);
-                start = Integer.parseInt(eingabestart);
-                ziel = Integer.parseInt(eingabeziel);
-                int [] zielarray = {0,0,0};
-                int [] startarray = {0,0,0};
-                if(ziel == 1){
-                    zielarray = towerone;
-                } else if (ziel == 2){
-                   zielarray = towertwo;
-                } else if (ziel == 3){
-                    zielarray = towerthree;
-                } else{
-                    System.out.println("Error");
-                }
-                if(start == 1){
-                    startarray = towerone;
-                } else if (start == 2){
-                    startarray = towertwo;
-                } else if (start == 3){
-                    startarray = towerthree;
+                Scanner towerInput = new Scanner(System.in);
+                String input = towerInput.nextLine();
+                if(input.length() == 2) {
+
+                    int[] target = targetArray(input);
+                    int[] start = startArray(input);
+                    if (target[arrayPos(target)] < start[arrayPos(start)]) {
+                        target[arrayPos(target) + 1] = start[arrayPos(start)];
+                        start[arrayPos(start)] = 0;
+                        turns = turns + 1;
+                    } else {
+                        System.out.println("\nFehlerhafter Zug");
+                    }
                 } else {
-                    System.out.println("Error");
+                    System.out.println("\nFehlerhafte Eingabe");
                 }
-                if (zielarray[arrayPos(zielarray)]<startarray[arrayPos(startarray)]) {
-                    zielarray[arrayPos(zielarray) + 1] = startarray[arrayPos(startarray)];
-                    startarray[arrayPos(startarray)] = 0;
-                } else {
-                    System.out.println("Error");
-                }
-            }
-            }
-        System.out.println("Gewonnen");
+    }
+}
+        System.out.println("\n"+output()+"\n"+"\nGewonnen!  Versuche: "+ turns +"\n");
+        towerone = towerthree;
+        towerthree = towertwo;
     }
 
     private static int arrayPos(int [] tower) {
@@ -125,11 +107,56 @@ public class Main {
         return count;
     }
 
+
+    private static int []targetArray(String input){
+        String targetInput = input.substring(1,2);
+        int target = Integer.parseInt(targetInput);
+        int [] targetingArray;
+        switch (target) {
+            case 1:
+                targetingArray = towerone;
+                break;
+            case 2:
+                targetingArray = towertwo;
+                break;
+            case 3:
+                targetingArray = towerthree;
+                break;
+            default:
+                System.out.println("Fehlerhaftes Ziel");
+                targetingArray = towererror;
+                break;
+        }
+        return targetingArray;
+    }
+
+    private static int []startArray(String input){
+        String startInput = input.substring(0,1);
+        int start = Integer.parseInt(startInput);
+        int [] startingArray;
+        switch (start) {
+            case 1:
+                startingArray = towerone;
+                break;
+            case 2:
+                startingArray = towertwo;
+                break;
+            case 3:
+                startingArray = towerthree;
+                break;
+            default:
+                System.out.println("Fehlerhafter Start");
+                startingArray = towererror;
+                break;
+        }
+        return startingArray;
+    }
+
     private static String output() {
 
-        return  towerone[3]+"|"+towerone[3]+"__"+towertwo[3]+"|"+towertwo[3]+"__"+towerthree[3]+"|"+towerthree[3]+"\n" +
-                towerone[2]+"|"+towerone[2]+"__"+towertwo[2]+"|"+towertwo[2]+"__"+towerthree[2]+"|"+towerthree[2]+"\n" +
-                towerone[1]+"|"+towerone[1]+"__"+towertwo[1]+"|"+towertwo[1]+"__"+towerthree[1]+"|"+towerthree[1]+"\n" +
-                " a    b   c\n";
+        return  "\n"+"|"+towerone[3]+"|___|"+towertwo[3]+"|___|"+towerthree[3]+"|\n" +
+                "|"+towerone[2]+"|___|"+towertwo[2]+"|___|"+towerthree[2]+"|\n" +
+                "|"+towerone[1]+"|___|"+towertwo[1]+"|___|"+towerthree[1]+"|\n" +
+                " a     b     c\n";
     }
 }
